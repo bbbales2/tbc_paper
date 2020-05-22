@@ -30,12 +30,12 @@ for(file in data_files_with_priors) {
   }
 
   for(r in 1:reps) {
-    inits = list(c11_coat = runif(0, priors$prior_sd_c11_coat),
-                 c11_coat = runif(0, priors$prior_sd_c12_coat),
-                 c11_coat = runif(0, priors$prior_sd_c13_coat),
-                 c11_coat = runif(0, priors$prior_sd_c33_coat),
-                 c11_coat = runif(0, priors$prior_sd_c44_coat),
-                 sigma_z = runif(0, 1))
+    inits = list(c11_coat = runif(1, 0, priors$prior_sd_c11_coat),
+                 c11_coat = runif(1, 0, priors$prior_sd_c12_coat),
+                 c11_coat = runif(1, 0, priors$prior_sd_c13_coat),
+                 c11_coat = runif(1, 0, priors$prior_sd_c33_coat),
+                 c11_coat = runif(1, 0, priors$prior_sd_c44_coat),
+                 sigma_z = runif(1, 0, 1))
     
     init_file = paste0(data, "/init.", r, ".dat")
     output_file = paste0(data, "/output.", r, ".csv")
@@ -43,7 +43,7 @@ for(file in data_files_with_priors) {
     
     stan_rdump(names(inits), init_file, env = list2env(inits))
     
-    fit_cmds = c(fit_cmds, paste0("./hex-fit optimize save_iterations=1 laplace_draws=200 init=", init_file, " data file=file output file=", output_file, " >& ", log_file))
+    fit_cmds = c(fit_cmds, paste0("./hex-fit optimize save_iterations=1 laplace_draws=200 init=", init_file, " data file=", file, " output file=", output_file, " >& ", log_file))
   }
   writeLines(fit_cmds, paste0("run_", data, "_fits.sh"))
 }
