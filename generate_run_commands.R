@@ -31,10 +31,10 @@ for(file in data_files_with_priors) {
 
   for(r in 1:reps) {
     inits = list(c11_coat = runif(1, 0, priors$prior_sd_c11_coat),
-                 c11_coat = runif(1, 0, priors$prior_sd_c12_coat),
-                 c11_coat = runif(1, 0, priors$prior_sd_c13_coat),
-                 c11_coat = runif(1, 0, priors$prior_sd_c33_coat),
-                 c11_coat = runif(1, 0, priors$prior_sd_c44_coat),
+                 c12_coat = runif(1, 0, priors$prior_sd_c12_coat),
+                 c13_coat = runif(1, 0, priors$prior_sd_c13_coat),
+                 c33_coat = runif(1, 0, priors$prior_sd_c33_coat),
+                 c44_coat = runif(1, 0, priors$prior_sd_c44_coat),
                  sigma_z = runif(1, 0, 1))
     
     init_file = paste0(data, "/init.", r, ".dat")
