@@ -141,7 +141,7 @@ parameters {
 transformed parameters {
   real sigma = sigma_z * prior_sd_sigma;
   real<lower = 0.0> c66_coat = (c11_coat - c12_coat) / 2.0;
-  real<lower = 0.0> ct1_coat = c11_coat - (c13_coat*c13_coat/c33_coat);
+  real ct1_coat = c11_coat - (c13_coat*c13_coat/c33_coat);
   
   matrix[6, 6] Csub = mech_rotate(build_C_cubic(c11_sub, c12_sub, c44_sub), cu2qu(cu));
 }

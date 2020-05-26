@@ -30,12 +30,32 @@ for(file in data_files_with_priors) {
   }
 
   for(r in 1:reps) {
-    inits = list(c11_coat = runif(1, 0, priors$prior_sd_c11_coat),
-                 c12_coat = runif(1, 0, priors$prior_sd_c12_coat),
-                 c13_coat = runif(1, 0, priors$prior_sd_c13_coat),
-                 c33_coat = runif(1, 0, priors$prior_sd_c33_coat),
-                 c44_coat = runif(1, 0, priors$prior_sd_c44_coat),
-                 sigma_z = runif(1, 0, 1))
+    c66_coat = -1
+    C = matrix(0, nrow = 6, ncol = 6)
+    while(c66_coat < 0 || any(eigen(C)$values <= 0)) {
+        inits = list(c11_coat = runif(1, 0, priors$prior_sd_c11_coat),
+                     c12_coat = runif(1, 0, priors$prior_sd_c12_coat),
+                     c13_coat = runif(1, 0, priors$prior_sd_c13_coat),
+                     c33_coat = runif(1, 0, priors$prior_sd_c33_coat),
+                     c44_coat = runif(1, 0, priors$prior_sd_c44_coat),
+                     sigma_z = runif(1, 0, 1))
+        c66_coat = (inits$c11_coat - inits$c12_coat) / 2.0
+
+        C = matrix(0, nrow = 6, ncol = 6)
+
+        C[1, 1] = inits$c11_coat
+        C[2, 2] = inits$c11_coat
+        C[3, 3] = inits$c33_coat
+        C[4, 4] = inits$c44_coat
+        C[5, 5] = inits$c44_coat
+        C[6, 6] = c66_coat
+        C[1, 2] = inits$c12_coat
+        C[1, 3] = inits$c13_coat
+        C[2, 3] = inits$c13_coat
+        C[3, 2] = inits$c13_coat
+        C[2, 1] = inits$c12_coat
+        C[3, 1] = inits$c13_coat
+    }
     
     init_file = paste0(data, "/init.", r, ".dat")
     output_file = paste0(data, "/output.", r, ".csv")
