@@ -17,37 +17,43 @@ read_laplace_csv = function(file) {
 }
 
 problems = c("bl1", "bl1b", "bl1c", "bl2a")
+constraint_names = c("both_pos", "c13_pos", "c12_pos", "neither_pos")
 basenames = c("output.1.csv", "output.2.csv", "output.3.csv", "output.4.csv")
 
+error_files = NULL
 opt_df = lapply(problems, function(problem) {
-  filenames = paste0(problem, "_with_priors/", basenames)
+  lapply(constraint_names, function(constraint) {
+    filenames = paste0(problem, "/", constraint, "/", basenames)
   
-  lapply(1:length(filenames), function(i) {
-    file = filenames[i]
-    
-    tryCatch({
-      df_opt = read_laplace_csv(file)$df_opt
+    lapply(1:length(filenames), function(i) {
+      file = filenames[i]
       
-      steps = nrow(df_opt)
-      
-      return(df_opt %>%
-        mutate(chain = i,
-               iteration = row_number() - steps,
-               problem = problem))
-    }, error = function(e) {
-      print(e)
-      print(file)
-      return(NULL)
-    })
+      tryCatch({
+        df_opt = read_laplace_csv(file)$df_opt
+        
+        steps = nrow(df_opt)
+        
+        return(df_opt %>%
+          mutate(chain = i,
+                 iteration = row_number() - steps,
+                 constraint = constraint,
+                 problem = problem))
+      }, error = function(e) {
+        print(e)
+        print(file)
+        error_files <<- c(error_files, file)
+        return(NULL)
+      })
+    }) %>% bind_rows
   }) %>% bind_rows
 }) %>% bind_rows
 
 opt_df %>%
   filter(lp__ > -10000) %>%
-  select(iteration, chain, problem, lp__, c11_coat, c12_coat, c13_coat, c33_coat, c44_coat, c66_coat) %>%
-  gather(which, value, -iteration, -chain, -problem) %>%
+  select(iteration, constraint, chain, problem, lp__, c11_coat, c12_coat, c13_coat, c33_coat, c44_coat, c66_coat) %>%
+  gather(which, value, -iteration, -chain, -problem, -constraint) %>%
   ggplot(aes()) +
-  geom_point(aes(iteration, value, color = factor(chain)), size = 0.25) +
+  geom_point(aes(iteration, value, color = constraint), size = 0.05) +
   facet_grid(which ~ problem, scale = "free")
 
 opt_df %>%

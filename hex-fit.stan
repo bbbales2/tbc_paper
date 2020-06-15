@@ -105,6 +105,9 @@ data {
   real<lower = 0.0> prior_sd_c33_coat;
   real<lower = 0.0> prior_sd_c44_coat;
   real<lower = 0.0> prior_sd_sigma;
+
+  int<lower = 0, upper = 1> c12_positive; // 0 for unconstrained c12, 1 for constrained c12
+  int<lower = 0, upper = 1> c13_positive; // 0 for unconstrained c13, 1 for constrained c13
 }
 
 transformed data {
@@ -131,14 +134,18 @@ transformed data {
 // See: http://solidmechanics.org/text/Chapter3_2/Chapter3_2.htm   for definitions
 parameters {
   real<lower = 0.0> c11_coat;
-  real c12_coat;
-  real c13_coat;
+  real c12_coat_u[1 - c12_positive];
+  real c13_coat_u[1 - c13_positive];
+  real<lower = 0.0> c12_coat_c[c12_positive];
+  real<lower = 0.0> c13_coat_c[c13_positive];
   real<lower = 0.0> c33_coat;
   real<lower = 0.0> c44_coat;
   real<lower = 0.0> sigma_z;
 }
 
 transformed parameters {
+  real c12_coat = (c12_positive > 0) ? c12_coat_c[1] : c12_coat_u[1];
+  real c13_coat = (c13_positive > 0) ? c13_coat_c[1] : c13_coat_u[1];
   real sigma = sigma_z * prior_sd_sigma;
   real<lower = 0.0> c66_coat = (c11_coat - c12_coat) / 2.0;
   real ct1_coat = c11_coat - (c13_coat*c13_coat/c33_coat);
