@@ -11,15 +11,6 @@ priors = list(prior_sd_c11_coat = 1.0,
 
 reps = 4
 
-data_files_with_priors = NULL
-
-for(file in data_files) {
-  data_with_priors = c(rstan::read_rdump(file), priors)
-  data_file_with_prior = paste0(tools::file_path_sans_ext(file), "_with_priors.dat")
-  stan_rdump(names(data_with_priors), data_file_with_prior, env = list2env(data_with_priors))
-  data_files_with_priors = c(data_files_with_priors, data_file_with_prior)
-}
-
 constraint_names = c("both_pos", "c13_pos", "c12_pos", "neither_pos")
 constraints = list(list(c12_positive = 1, c13_positive = 1),
                    list(c12_positive = 0, c13_positive = 1),
@@ -32,11 +23,6 @@ for(file in data_files) {
   for(c in 1:length(constraints)) {
     data = paste0(tools::file_path_sans_ext(file), "/", constraint_names[c])
     base_stan_data = read_rdump(file)
-    
-    base_stan_data[["PX"]] = 4
-    base_stan_data[["PY"]] = 4
-    base_stan_data[["PZ_sub"]] = 0
-    base_stan_data[["PZ_coat"]] = 0
     
     stan_data = c(base_stan_data, priors, constraints[[c]])
     
